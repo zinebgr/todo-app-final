@@ -10,7 +10,24 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# قراءة ملف .env يدويًا
+env_vars = {}
+env_path = os.path.join(BASE_DIR, '.env')
+if os.path.exists(env_path):
+    with open(env_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                key, value = line.split('=', 1)
+                env_vars[key] = value
+
+SECRET_KEY = env_vars.get('SECRET_KEY')
+DEBUG = env_vars.get('DEBUG', 'False').lower() == 'true'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +37,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g(2o8ezv$3$i_c8yp%k-uzr24c26-g!_200wbqob*5_x4eb3sb'
+SECRET_KEY = 'django-insecure-9^pq5%qb80z7l4^z^)5h@e&xk%d&d71=#)3lvdb)wnwwxudv@+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
