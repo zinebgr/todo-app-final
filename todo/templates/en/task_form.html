@@ -1,0 +1,74 @@
+{% extends 'en/base.html' %}
+
+{% block title %}{{ title }} - TaskMaster Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg border-0 animate__animated animate__fadeInUp">
+            <div class="card-header bg-transparent border-0 pt-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-{% if 'Edit' in title %}edit{% else %}plus-circle{% endif %} fa-2x" style="color: #667eea;"></i>
+                    <h3 class="mb-0 ms-3 fw-bold">{{ title }}</h3>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" id="taskForm">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold mb-2">
+                                {% if field.name == 'title' %}Title
+                                {% elif field.name == 'description' %}Description
+                                {% elif field.name == 'completed' %}Completed
+                                {% elif field.name == 'due_date' %}Due Date
+                                {% else %}{{ field.label }}{% endif %}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            
+                            {% if field.name == 'completed' %}
+                                <div class="form-check">
+                                    {{ field }}
+                                    <label class="form-check-label" for="{{ field.id_for_label }}">
+                                        Mark as completed
+                                    </label>
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ field.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'todo:task_list' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Save Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('#taskForm input:not([type="checkbox"]), #taskForm textarea, #taskForm select').forEach(field => {
+        field.classList.add('form-control');
+        field.classList.add('form-control-lg');
+    });
+    
+    document.querySelectorAll('#taskForm input[type="checkbox"]').forEach(field => {
+        field.classList.add('form-check-input');
+        field.classList.add('me-2');
+    });
+</script>
+{% endblock %}
