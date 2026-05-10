@@ -3,28 +3,23 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ===== قراءة المتغيرات من البيئة (من ملف .env) =====
 def get_env_variable(name, default=None):
     value = os.environ.get(name, default)
     if value is None:
         raise ValueError(f"Missing required environment variable: {name}")
     return value
 
-# قراءة المفتاح السري و DEBUG
 SECRET_KEY = get_env_variable('SECRET_KEY')
 
-# DEBUG يجب أن يكون False في الإنتاج
 DEBUG = get_env_variable('DJANGO_DEBUG', 'False').lower() == 'true'
 
-# ===== النطاقات المسموحة =====
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.pythonanywhere.com',        # يسمح لأي نطاق فرعي على pythonanywhere
-    'zinebgr.pythonanywhere.com', # ⚠️ استبدلي zinebgr باسم حسابك الحقيقي
+    '.pythonanywhere.com',        
+    'zinebgr.pythonanywhere.com', 
 ]
 
-# ===== التطبيقات والوسطيات =====
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -66,7 +61,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'todo_list.wsgi.application'
 
-# ===== قاعدة البيانات (SQLite) - مناسبة للإنتاج البسيط =====
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -74,7 +68,6 @@ DATABASES = {
     }
 }
 
-# ===== التحقق من كلمات المرور (مهم) =====
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -82,7 +75,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ===== اللغة والوقت =====
 LANGUAGE_CODE = 'ar'
 TIME_ZONE = 'Africa/Algiers'
 USE_I18N = True
@@ -96,18 +88,16 @@ LANGUAGES = [
 
 LOCALE_PATHS = [BASE_DIR / 'locale']
 
-# ===== الملفات الثابتة =====
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'   # مهم جداً لـ collectstatic
+STATIC_ROOT = BASE_DIR / 'staticfiles'   
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ===== أمان إضافي في بيئة الإنتاج =====
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    # لا تفعلي SESSION_COOKIE_SECURE أو CSRF_COOKIE_SECURE إلا إذا كان لديك HTTPS
+    # لا تفعل SESSION_COOKIE_SECURE أو CSRF_COOKIE_SECURE إلا إذا كان لديك HTTPS
