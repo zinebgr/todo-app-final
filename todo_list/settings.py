@@ -4,9 +4,6 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 def load_env_file(filepath):
-    """
-    تقوم بقراءة ملف .env وإضافة المتغيرات إلى بيئة التشغيل (os.environ)
-    """
     if not os.path.exists(filepath):
         print(f"Warning: .env file not found at {filepath}. Using fallback values.")
         return
@@ -55,7 +52,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',  # للترجمة
+    'django.middleware.locale.LocaleMiddleware',  
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
