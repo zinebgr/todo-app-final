@@ -4,72 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#6366f1">
-    
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="مدير المهام">
-    <meta name="mobile-web-app-capable" content="yes">
-    
     <title>{% block title %}مدير المهام{% endblock %}</title>
     
-    <!-- Bootstrap RTL -->
+    <!-- Bootstrap RTL & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css">
     
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
-    <style>
-        body {
-            font-family: 'Cairo', 'Tahoma', sans-serif;
-        }
-        .task-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .task-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .drag-handle {
-            cursor: grab;
-        }
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-    </style>
-    {% block extra_css %}{% endblock %}
+    <link rel="manifest" href="/static/manifest.json">
 </head>
 <body class="bg-light">
-    <!-- شريط التنقل -->
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container">
             <a class="navbar-brand fw-bold fs-4" href="{% url 'todo:task_list' %}">
                 <i class="fas fa-check-circle me-2"></i>
                 مدير المهام المحترف
             </a>
-            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="d-flex me-auto">
-                    <!-- يمكنك وضع روابط إضافية هنا -->
-                </div>
-                
-                <div class="d-flex">
-                    <!-- تبديل اللغة -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="nav-link text-white">
+                                <i class="fas fa-user-circle me-1"></i> 
+                                مرحباً، {{ user.username }}
+                            </span>
+                        </li>
+                    {% endif %}
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-out-alt me-1"></i> خروج
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}?next=/" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i> دخول
+                        </a>
+                        <a href="{% url 'signup' %}" class="btn btn-light btn-sm text-primary">
+                            <i class="fas fa-user-plus me-1"></i> حساب جديد
+                        </a>
+                    {% endif %}
                     <form action="{% url 'todo:change_language' %}" method="post" class="d-inline">
                         {% csrf_token %}
-                        <button type="submit" name="language" value="en" class="btn btn-outline-light">
-                            <i class="fas fa-globe me-1"></i>
-                            English
+                        <button type="submit" name="language" value="en" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-globe me-1"></i> English
                         </button>
                     </form>
                 </div>
@@ -77,51 +64,38 @@
         </div>
     </nav>
 
-    <!-- المحتوى الرئيسي -->
     <main class="py-4">
         <div class="container">
-            <!-- رسائل التنبيه -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
-                        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeInDown">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
             {% endif %}
-            
-            {% block content %}
-            {% endblock %}
+            {% block content %}{% endblock %}
         </div>
     </main>
 
-    <!-- تذييل الصفحة -->
     <footer class="footer mt-auto py-3 bg-white shadow-sm">
         <div class="container text-center">
             <span class="text-muted">
-                <i class="fas fa-heart text-danger"></i>
+                <i class="fas fa-heart text-danger"></i> 
                 مدير المهام المحترف - أنجز مهامك بسهولة
             </span>
         </div>
     </footer>
 
-    <!-- السكريبتات الأساسية -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
-    
-    <!-- تسجيل Service Worker لتشغيل PWA -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/js/sw.js')
-                    .then(reg => console.log('Service Worker registered!', reg))
-                    .catch(err => console.log('Service Worker registration failed:', err));
-            });
+            navigator.serviceWorker.register('/static/js/sw.js')
+                .catch(err => console.log('SW registration failed:', err));
         }
     </script>
-    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

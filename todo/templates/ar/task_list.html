@@ -1,9 +1,11 @@
 {% extends 'ar/base.html' %}
 
-{% block title %}مهامي - مدير المهام{% endblock %}
+{% block title %}قائمة مهامي - مدير المهام المحترف{% endblock %}
 
 {% block content %}
+{% if user.is_authenticated %}
 <div class="row">
+    <!-- الشريط الجانبي مع الإحصائيات -->
     <div class="col-lg-4 mb-4">
         <div class="card shadow-sm border-0 mb-4 animate__animated animate__fadeInRight">
             <div class="card-body p-4">
@@ -39,7 +41,7 @@
                         <div class="stat-card p-3 rounded text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <small>بالانتظار</small>
+                                    <small>قيد الانتظار</small>
                                     <h3 class="mb-0">{{ stats.pending }}</h3>
                                 </div>
                                 <i class="fas fa-clock fa-2x opacity-50"></i>
@@ -53,14 +55,14 @@
                         <small>نسبة الإنجاز</small>
                         <small class="fw-bold">
                             {% if stats.total > 0 %}
-                                {{ stats.completed|floatformat:0 }}%
+                                {% widthratio stats.completed stats.total 100 %}%
                             {% else %}
                                 0%
                             {% endif %}
                         </small>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar" style="width: {% if stats.total > 0 %}{{ stats.completed|floatformat:0 }}{% else %}0{% endif %}%;"></div>
+                        <div class="progress-bar" style="width: {% if stats.total > 0 %}{% widthratio stats.completed stats.total 100 %}{% else %}0{% endif %}%;"></div>
                     </div>
                 </div>
             </div>
@@ -93,7 +95,7 @@
                                 الكل
                             </a>
                             <a href="?filter=pending" class="btn btn-outline-warning {% if filter_status == 'pending' %}active{% endif %}">
-                                بالانتظار
+                                قيد الانتظار
                             </a>
                             <a href="?filter=completed" class="btn btn-outline-success {% if filter_status == 'completed' %}active{% endif %}">
                                 مكتملة
@@ -159,6 +161,17 @@
         </div>
     </div>
 </div>
+{% else %}
+<div class="text-center mt-5">
+    <div class="card shadow-sm border-0 p-5">
+        <i class="fas fa-lock fa-4x text-muted mb-3"></i>
+        <h3>الرجاء تسجيل الدخول</h3>
+        <p class="text-muted">يجب تسجيل الدخول لعرض قائمة مهامك</p>
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary mt-3">تسجيل الدخول</a>
+        <a href="{% url 'todo:signup' %}" class="btn btn-outline-secondary mt-2">إنشاء حساب جديد</a>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -199,34 +212,31 @@
 
     const container = document.getElementById('tasks-container');
     if (container && typeof dragula !== 'undefined') {
-        const taskCards = container.querySelectorAll('.task-card');
-        if (taskCards.length > 1) {
-            const drake = dragula([container], {
-                moves: function(el, container, handle) {
-                    return handle.classList.contains('drag-handle') || handle.parentElement.classList.contains('drag-handle');
+        const drake = dragula([container], {
+            moves: function(el, container, handle) {
+                return handle.classList.contains('drag-handle') || handle.parentElement.classList.contains('drag-handle');
+            },
+            direction: 'vertical'
+        });
+        
+        drake.on('dragend', function(el) {
+            const taskIds = Array.from(container.querySelectorAll('.task-card')).map(card => card.dataset.taskId);
+            fetch('/update-order/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
-                direction: 'vertical'
-            });
-            
-            drake.on('dragend', function(el) {
-                const taskIds = Array.from(container.querySelectorAll('.task-card')).map(card => card.dataset.taskId);
-                fetch('/update-order/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({order: taskIds})
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        console.log('Order updated successfully');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            });
-        }
+                body: JSON.stringify({order: taskIds})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('Order updated successfully');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
     }
 </script>
 {% endblock %}

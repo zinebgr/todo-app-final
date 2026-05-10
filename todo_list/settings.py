@@ -3,21 +3,43 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-def get_env_variable(name, default=None):
-    value = os.environ.get(name, default)
-    if value is None:
-        raise ValueError(f"Missing required environment variable: {name}")
-    return value
+def load_env_file(filepath):
+    """
+    تقوم بقراءة ملف .env وإضافة المتغيرات إلى بيئة التشغيل (os.environ)
+    """
+    if not os.path.exists(filepath):
+        print(f"Warning: .env file not found at {filepath}. Using fallback values.")
+        return
 
-SECRET_KEY = get_env_variable('SECRET_KEY')
+    with open(filepath, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' in line:
+                key, value = line.split('=', 1)
+                key = key.strip()
+                value = value.strip()
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1]
+                elif value.startswith("'") and value.endswith("'"):
+                    value = value[1:-1]
+                os.environ[key] = value
 
-DEBUG = get_env_variable('DJANGO_DEBUG', 'False').lower() == 'true'
+env_path = BASE_DIR / '.env'
+load_env_file(env_path)
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is not set. Please add it to .env file.")
+
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.pythonanywhere.com',        
-    'zinebgr.pythonanywhere.com', 
+    '.pythonanywhere.com',          
+    'zinebgr.pythonanywhere.com',   
 ]
 
 INSTALLED_APPS = [
@@ -27,13 +49,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'todo',
+    'todo',  
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # للترجمة
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -46,7 +68,7 @@ ROOT_URLCONF = 'todo_list.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -90,7 +112,7 @@ LOCALE_PATHS = [BASE_DIR / 'locale']
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'   
+STATIC_ROOT = BASE_DIR / 'staticfiles'  
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -100,4 +122,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    # لا تفعل SESSION_COOKIE_SECURE أو CSRF_COOKIE_SECURE إلا إذا كان لديك HTTPS
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'todo:task_list'
+LOGOUT_REDIRECT_URL = 'login'
