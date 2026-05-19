@@ -21,6 +21,11 @@
 
 ---
 
+## 🌐 التطبيق الحي
+
+جرب التطبيق مباشرة:  
+👉 **[https://zinebgr.pythonanywhere.com](https://zinebgr.pythonanywhere.com)** 👈
+
 ## 🛠️ التقنيات المستخدمة
 
 - **الخلفية**: Django 5.0.6
